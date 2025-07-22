@@ -1,0 +1,25 @@
+pipeline{
+  agent {
+    node{
+      label 'slave'
+    }
+  }
+  stages {
+    stage('Notification') {
+      steps {
+          slackSend channel: 'deployment-team', color: '#439FE0', message: 'Ecomm deployment job started', teamDomain: 'project-ste2943', tokenCredentialId: 'slack'
+            }
+        }
+    stage ('Sonar analysis') {
+      steps {
+        sh 'cd webapp'
+        sh 'docker run --rm -e SONAR_HOST_URL="http://54.67.42.46:9000" -e SONAR_SCANNER_OPTS="-Dsonar.projectKey=lms" -e SONAR_TOKEN="sqp_9adea34a8a04d0749d54300b71f729620e4506e9" -v ".:/usr/src" sonarsource/sonar-scanner-cli'
+      }
+    }
+    stage('Email Notification') {
+      steps {
+          emailext body: 'Ecomm application deployed successfully into Prod Environment', subject: 'Ecomm Deployment', to: 'murali@digitaledify.ai'
+          }
+      }  
+  }
+}
