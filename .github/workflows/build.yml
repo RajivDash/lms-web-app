@@ -1,12 +1,14 @@
 name: Sonar Analysis
 
 on:
-  - push
   - workflow_dispatch
 jobs:
-  build:
-    name: Build and analyze
-    runs-on: ubuntu-latest
+  soanr-analysis:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: sonar analysis on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     
     steps:
       - uses: actions/checkout@v4
