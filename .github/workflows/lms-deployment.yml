@@ -35,7 +35,7 @@ jobs:
           fi
       - name: create lmsdb container
         run: |
-          if docker ps  -a --format '{{ .Name }}' | grep -wq lmsdb; then
+          if docker ps  -a --format '{{ .Names }}' | grep -wq lmsdb; then
             echo "lmsdb container exist"
           else
             docker container run -dt --name lmsdb -p 5432:5432 --network lmsnetwork -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
