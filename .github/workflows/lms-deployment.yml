@@ -65,12 +65,40 @@ jobs:
         run: docker push ${{vars.DOCKER_USERNAME}}/web:latest
 
 
+  backend:
+    needs: 
+      - database
+      - build
+    runs-on: deploy
+    steps:
+      - name: pull the image
+        run: docker pull ${{vars.DOCKER_USERNAME}}/api:latest
+      - name: run the backend
+        run: |
+          if docker ps  -a --format '{{ .Names }}' | grep -wq backend; then
+            echo "backend container exist"
+            docker containerrm -f backend
+            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgressql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
+          else
+            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgressql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
+          fi
 
-
-
-
-
-
+  frontend:
+      needs: 
+        - build
+      runs-on: deploy
+      steps:
+        - name: pull the image
+          run: docker pull ${{vars.DOCKER_USERNAME}}/web:latest
+        - name: run the frontend
+          run: |
+            if docker ps  -a --format '{{ .Names }}' | grep -wq frontend; then
+              echo "frontend container exist"
+              docker containerrm -f frontend
+              docker container run -dt --name frontend -p 80:80 --network lmsnetwork ${{vars.DOCKER_USERNAME}}/web:latest
+            else
+              docker container run -dt --name frontend -p 80:80 --network lmsnetwork ${{vars.DOCKER_USERNAME}}/web:latest
+            fi
 
 
 
