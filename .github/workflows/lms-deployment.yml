@@ -21,6 +21,18 @@ jobs:
     steps:
       - name: approval confirmation
         run: echo "approval give to deploy into production"
+  linting:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         
   database:
     needs: approval
@@ -41,7 +53,9 @@ jobs:
             docker container run -dt --name lmsdb -p 5432:5432 --network lmsnetwork -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
           fi
   build:
-    needs: approval
+    needs: 
+      - approval
+      - linting
     runs-on: ubuntu-latest
     steps:
       - name: checkout the code
@@ -78,6 +92,7 @@ jobs:
           if docker ps  -a --format '{{ .Names }}' | grep -wq backend; then
             echo "backend container exist"
             docker container rm -f backend
+            docker rmi ${{vars.DOCKER_USERNAME}}/api:latest
             docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD }}@lmsdb:5432/postgres -e PORT=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
           else
             docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD }}@lmsdb:5432/postgres -e PORT=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
@@ -95,6 +110,7 @@ jobs:
             if docker ps  -a --format '{{ .Names }}' | grep -wq frontend; then
               echo "frontend container exist"
               docker container rm -f frontend
+              docker rmi ${{vars.DOCKER_USERNAME}}/web:latest
               docker container run -dt --name frontend -p 80:80 --network lmsnetwork ${{vars.DOCKER_USERNAME}}/web:latest
             else
               docker container run -dt --name frontend -p 80:80 --network lmsnetwork ${{vars.DOCKER_USERNAME}}/web:latest
