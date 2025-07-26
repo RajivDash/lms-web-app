@@ -24,7 +24,19 @@ jobs:
         
   database:
     needs: approval
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: create db
-        run: echo "database container created"
+      - name: create docker network
+        run: |
+          if  docker network ls --format '{{ .name }}' | grep -wq lmsnetwork; then
+            echo "lmsnetwork exist"
+          else
+            docker network create lmsnetwork
+          fi
+      - name: create lmsdb container
+        run: |
+          if docker ps  -a --format '{{ .name }}' | grep -wq lmsdb; then
+            echo "lmsdb container exist"
+          else
+            docker container run -dt --name lmsdb -p 5432:5432 --network -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
+          fi
