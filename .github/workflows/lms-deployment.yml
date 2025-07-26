@@ -1,0 +1,30 @@
+name: lms-deployment
+on: workflow_dispatch
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: send notification
+        uses: slackapi/slack-github-action@v2.1.1
+        with: 
+          webhook: ${{ secret.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            channel: project-7
+            text: "LMS Production Deployment Started, Required Approval to Continue..."
+
+  approval:
+    needs: notification
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: approval confirmation
+        run: echo "approval give to deploy into production"
+        
+  database:
+    needs: approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: create db
+        echo: "database container created"
