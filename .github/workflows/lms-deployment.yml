@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: create docker network
         run: |
-          if  docker network ls --format '{{ .Names }}' | grep -wq lmsnetwork; then
+          if  docker network ls --format '{{ .Name }}' | grep -wq lmsnetwork; then
             echo "lmsnetwork exist"
           else
             docker network create lmsnetwork
@@ -38,5 +38,5 @@ jobs:
           if docker ps  -a --format '{{ .name }}' | grep -wq lmsdb; then
             echo "lmsdb container exist"
           else
-            docker container run -dt --name lmsdb -p 5432:5432 --network -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
+            docker container run -dt --name lmsdb -p 5432:5432 --network lmsnetwork -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
           fi
