@@ -52,7 +52,7 @@ jobs:
           docker build -t ${{vars.DOCKER_USERNAME}}/api:latest .
       - name: build frontend image
         run: |
-          cd api
+          cd web
           docker build -t ${{vars.DOCKER_USERNAME}}/web:latest .
       - name: Docker Hub Login
         uses: docker/login-action@v3.4.0
@@ -77,10 +77,10 @@ jobs:
         run: |
           if docker ps  -a --format '{{ .Names }}' | grep -wq backend; then
             echo "backend container exist"
-            docker containerrm -f backend
-            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgressql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
+            docker container rm -f backend
+            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql:://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
           else
-            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgressql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
+            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
           fi
 
   frontend:
