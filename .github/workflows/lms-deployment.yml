@@ -78,9 +78,9 @@ jobs:
           if docker ps  -a --format '{{ .Names }}' | grep -wq backend; then
             echo "backend container exist"
             docker container rm -f backend
-            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
+            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD}}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
           else
-            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{secrets.DOCKER_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
+            docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD}}@lmsdb:5432/postgres -e port=3000 -e MODE=Prod ${{vars.DOCKER_USERNAME}}/api:latest
           fi
 
   frontend:
