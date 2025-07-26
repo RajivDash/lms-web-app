@@ -94,7 +94,7 @@ jobs:
           run: |
             if docker ps  -a --format '{{ .Names }}' | grep -wq frontend; then
               echo "frontend container exist"
-              docker containerrm -f frontend
+              docker container rm -f frontend
               docker container run -dt --name frontend -p 80:80 --network lmsnetwork ${{vars.DOCKER_USERNAME}}/web:latest
             else
               docker container run -dt --name frontend -p 80:80 --network lmsnetwork ${{vars.DOCKER_USERNAME}}/web:latest
