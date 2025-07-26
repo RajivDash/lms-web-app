@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: create docker network
         run: |
-          if  docker network ls --format '{{ .name }}' | grep -wq lmsnetwork; then
+          if  docker network ls --format '{{ .Names }}' | grep -wq lmsnetwork; then
             echo "lmsnetwork exist"
           else
             docker network create lmsnetwork
